@@ -1,0 +1,926 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Xiaobu Chinese</title>
+<style>html{color-scheme:light}body{margin:0}[hidden]{display:none!important}</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700&family=Noto+Serif+SC:wght@500;700&display=swap">
+<style>
+/* Layout: one narrow column (max 520px). Home lists lessons; a lesson has Words, Cards and Quiz tabs. Blue-and-white porcelain palette, one red seal stamp as the only loud detail. */
+:root {
+  --bg: #f3f6fb;
+  --card: #ffffff;
+  --line: #d5deec;
+  --ink: #12203a;
+  --muted: #55657f;
+  --accent: #1f4fa3;
+  --accent-ink: #ffffff;
+  --accent-soft: #e3ebfa;
+  --seal: #c4372c;
+  --ok: #1d7a4f;
+  --ok-soft: #def3e8;
+  --bad: #b3261e;
+  --bad-soft: #fbe4e1;
+  --ui: 'Figtree', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --hanzi: 'Noto Serif SC', 'Songti SC', 'STSong', 'SimSun', serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0c1322; --card: #141d33; --line: #26334f; --ink: #e6ecf8; --muted: #93a3c2;
+    --accent: #7da2ff; --accent-ink: #0c1322; --accent-soft: #1b2a4d; --seal: #e2594d;
+    --ok: #5fd39a; --ok-soft: #123326; --bad: #ff8a80; --bad-soft: #3a1a1a; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0c1322; --card: #141d33; --line: #26334f; --ink: #e6ecf8; --muted: #93a3c2;
+  --accent: #7da2ff; --accent-ink: #0c1322; --accent-soft: #1b2a4d; --seal: #e2594d;
+  --ok: #5fd39a; --ok-soft: #123326; --bad: #ff8a80; --bad-soft: #3a1a1a; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--ui); font-size: 16px; line-height: 1.45;
+  padding-block: 18px 40px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; justify-content: center;
+}
+.app { width: 100%; max-width: 520px; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+h1, h2, h3, p { margin: 0; }
+h1 { font-size: 1.9rem; line-height: 1.12; font-weight: 700; letter-spacing: -0.02em; text-wrap: balance; }
+h2 { font-size: 1.3rem; font-weight: 700; text-wrap: balance; }
+.zh { font-family: var(--hanzi); font-weight: 700; }
+.eyebrow { font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.lede { color: var(--muted); max-width: 46ch; }
+.hero { display: flex; flex-direction: column; gap: 10px; padding-top: 6px; }
+.bar { height: 8px; border-radius: 4px; background: var(--accent-soft); overflow: hidden; }
+.bar > i { display: block; height: 100%; background: var(--accent); border-radius: 4px; }
+.meter { display: flex; flex-direction: column; gap: 6px; font-size: 0.9rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.btn {
+  background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 10px; font-weight: 700;
+  padding: 12px 18px; min-height: 48px; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn.ghost { background: var(--accent-soft); color: var(--accent); }
+.btn.line { background: transparent; border: 1.5px solid var(--line); color: var(--ink); }
+.btn[disabled] { opacity: 0.5; cursor: default; }
+.btn:active { transform: translateY(1px); }
+.row { display: flex; gap: 10px; flex-wrap: wrap; }
+.row > .btn { flex: 1 1 140px; }
+svg.i { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+
+.unit {
+  display: grid; grid-template-columns: 64px 1fr; gap: 14px; align-items: center; text-align: left; width: 100%;
+  background: var(--card); border: 1.5px solid var(--line); border-radius: 14px; padding: 14px;
+}
+.unit .glyph { font-family: var(--hanzi); font-weight: 700; font-size: 1.6rem; color: var(--accent); background: var(--accent-soft); border-radius: 10px; height: 64px; display: grid; place-items: center; }
+.unit .meta { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.unit .t { font-weight: 700; font-size: 1.05rem; }
+.unit .d { color: var(--muted); font-size: 0.9rem; }
+.unit .foot { display: flex; align-items: center; gap: 10px; font-size: 0.8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.unit .foot .bar { flex: 1; }
+.units { display: flex; flex-direction: column; gap: 10px; }
+.tone-link { border-color: var(--accent); }
+.partHead { display: flex; flex-direction: column; gap: 4px; padding-top: 10px; }
+.tag { display: inline-block; vertical-align: middle; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--accent); background: var(--accent-soft); border-radius: 6px; padding: 2px 6px; margin-left: 4px; }
+.word .zh.long { font-size: 1.35rem; }
+.exbtn { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; margin-top: 8px; padding: 8px 10px; background: var(--accent-soft); border: 0; border-radius: 10px; text-align: left; color: var(--accent); min-height: 44px; }
+.exb { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.exz { font-size: 1.15rem; font-weight: 500; color: var(--ink); overflow-wrap: anywhere; }
+.exp { color: var(--accent); font-size: 0.85rem; font-weight: 600; }
+.exe { color: var(--muted); font-size: 0.85rem; }
+.exbox { width: 100%; border-top: 1.5px solid var(--line); margin-top: 6px; padding-top: 12px; display: flex; flex-direction: column; gap: 2px; }
+.exz2 { font-size: 1.35rem; font-weight: 500; overflow-wrap: anywhere; }
+.flash .zh.xl { font-size: 1.9rem; }
+.qcard .zh.xl { font-size: 1.6rem; }
+.qcard .zh.cloze { font-size: 2rem; font-weight: 500; line-height: 1.3; }
+.blank { color: var(--accent); letter-spacing: 2px; border-bottom: 3px solid var(--accent); }
+.en-big.sm { font-size: 1.05rem; font-weight: 600; color: var(--muted); }
+details.g { background: var(--card); border: 1.5px solid var(--line); border-radius: 14px; }
+details.g summary { cursor: pointer; padding: 14px 44px 14px 14px; list-style: none; display: flex; flex-direction: column; gap: 4px; min-height: 48px; position: relative; }
+details.g summary::-webkit-details-marker { display: none; }
+details.g summary::after { content: '+'; position: absolute; right: 16px; top: 10px; font-size: 1.5rem; color: var(--accent); line-height: 1.2; }
+details.g[open] summary::after { content: '\2013'; }
+details.g[open] summary { border-bottom: 1.5px solid var(--line); }
+details.g summary:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 14px; }
+.gt { font-weight: 700; font-size: 1.05rem; }
+.gp { color: var(--accent); font-weight: 600; font-size: 0.92rem; overflow-wrap: anywhere; }
+.gb { padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+.why { color: var(--ink); }
+.gex { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.stars { color: var(--seal); letter-spacing: 2px; }
+
+.topbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.back { background: none; border: 0; padding: 8px 8px 8px 0; min-height: 44px; display: inline-flex; align-items: center; gap: 4px; color: var(--accent); font-weight: 700; }
+.brand { font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.brand .zh { color: var(--seal); font-size: 1.3rem; }
+.toggle { background: var(--card); border: 1.5px solid var(--line); border-radius: 20px; padding: 6px 12px; font-size: 0.85rem; font-weight: 600; min-height: 36px; }
+.toggle[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+
+.tabs { display: flex; gap: 6px; background: var(--accent-soft); padding: 4px; border-radius: 12px; }
+.tabs button { flex: 1; border: 0; background: transparent; padding: 10px; border-radius: 9px; font-weight: 700; color: var(--muted); min-height: 44px; }
+.tabs button[aria-selected="true"] { background: var(--card); color: var(--accent); box-shadow: 0 1px 2px rgba(0,0,0,0.12); }
+
+.words { display: flex; flex-direction: column; gap: 8px; }
+.word { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 10px; background: var(--card); border: 1.5px solid var(--line); border-radius: 12px; padding: 10px 10px 10px 14px; }
+.word .zh { font-size: 1.7rem; line-height: 1.2; overflow-wrap: anywhere; }
+.word .py { color: var(--accent); font-weight: 600; font-size: 0.95rem; }
+.word .en { color: var(--muted); font-size: 0.95rem; }
+.word .acts { display: flex; align-items: center; gap: 8px; }
+.icon-btn { width: 44px; height: 44px; border-radius: 50%; border: 0; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; }
+.stamp { width: 26px; height: 26px; background: var(--seal); color: #fff; border-radius: 4px; display: grid; place-items: center; font-family: var(--hanzi); font-weight: 700; font-size: 0.95rem; transform: rotate(-6deg); }
+.stamp.lg { width: 84px; height: 84px; font-size: 3rem; border-radius: 8px; }
+
+.flash { width: 100%; min-height: 280px; background: var(--card); border: 1.5px solid var(--line); border-radius: 18px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 20px; text-align: center; }
+.flash .zh { font-size: 5.5rem; line-height: 1.1; color: var(--ink); overflow-wrap: anywhere; }
+.flash .zh.long { font-size: 2.8rem; }
+.flash .py-big { font-size: 1.8rem; font-weight: 700; color: var(--accent); }
+.flash .en-big { font-size: 1.5rem; font-weight: 600; }
+.flash .tap { font-size: 0.85rem; color: var(--muted); }
+.count { font-size: 0.9rem; color: var(--muted); font-variant-numeric: tabular-nums; display: flex; justify-content: space-between; }
+
+.qcard { background: var(--card); border: 1.5px solid var(--line); border-radius: 18px; padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; }
+.q-label { color: var(--muted); font-weight: 600; font-size: 0.95rem; }
+.qcard .zh { font-size: 4rem; line-height: 1.15; overflow-wrap: anywhere; }
+.qcard .zh.long { font-size: 2.2rem; }
+.en-big { font-size: 1.6rem; font-weight: 700; }
+.opts { display: flex; flex-direction: column; gap: 10px; }
+.opt { text-align: left; background: var(--card); border: 1.5px solid var(--line); border-radius: 12px; padding: 12px 14px; min-height: 52px; display: flex; flex-direction: column; justify-content: center; gap: 2px; font-weight: 600; font-size: 1.05rem; }
+.opt .zh { font-size: 1.5rem; }
+.opt small { color: var(--muted); font-weight: 600; font-size: 0.85rem; }
+.opt.ok { background: var(--ok-soft); border-color: var(--ok); color: var(--ok); }
+.opt.bad { background: var(--bad-soft); border-color: var(--bad); color: var(--bad); }
+.opt.dim { opacity: 0.55; }
+.fb { font-weight: 700; }
+.fb.ok { color: var(--ok); }
+.fb.bad { color: var(--bad); }
+.result { background: var(--card); border: 1.5px solid var(--line); border-radius: 18px; padding: 26px 20px; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; }
+.result .score { font-size: 2.6rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+.tones { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.tone { background: var(--card); border: 1.5px solid var(--line); border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 6px; }
+.tone svg.chart { width: 100%; height: auto; color: var(--accent); }
+.tone .name { font-weight: 700; font-size: 0.9rem; color: var(--muted); }
+.tone .ex { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.tone .ex .zh { font-size: 2rem; }
+.tone .ex b { font-size: 1.2rem; color: var(--accent); }
+.tone .mean { font-size: 0.9rem; color: var(--muted); }
+.tip { background: var(--accent-soft); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 4px; }
+.tip b { color: var(--accent); }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); max-width: calc(100% - 32px); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 10px; font-size: 0.9rem; z-index: 20; text-align: center; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<main class="app" id="app"></main>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+(function () {
+  'use strict';
+
+  var UNITS = [
+    { id: 'hello', zh: '你好', title: 'Greetings', desc: 'Hello, thanks and goodbye', words: [
+      ['你好', 'nǐ hǎo', 'hello'],
+      ['谢谢', 'xièxie', 'thank you'],
+      ['不客气', 'bú kèqi', "you're welcome"],
+      ['再见', 'zàijiàn', 'goodbye'],
+      ['对不起', 'duìbuqǐ', 'sorry'],
+      ['没关系', 'méi guānxi', "it's okay"],
+      ['请', 'qǐng', 'please'],
+      ['早上好', 'zǎoshang hǎo', 'good morning'],
+      ['晚安', "wǎn'ān", 'good night']
+    ] },
+    { id: 'num', zh: '一二三', title: 'Numbers 1 to 10', desc: 'Count from one to ten', words: [
+      ['一', 'yī', 'one (1)'], ['二', 'èr', 'two (2)'], ['三', 'sān', 'three (3)'], ['四', 'sì', 'four (4)'], ['五', 'wǔ', 'five (5)'],
+      ['六', 'liù', 'six (6)'], ['七', 'qī', 'seven (7)'], ['八', 'bā', 'eight (8)'], ['九', 'jiǔ', 'nine (9)'], ['十', 'shí', 'ten (10)']
+    ] },
+    { id: 'people', zh: '我你他', title: 'People and family', desc: 'I, you, he, she and your family', words: [
+      ['我', 'wǒ', 'I, me'], ['你', 'nǐ', 'you'], ['他', 'tā', 'he'], ['她', 'tā', 'she'],
+      ['妈妈', 'māma', 'mom'], ['爸爸', 'bàba', 'dad'], ['朋友', 'péngyou', 'friend'], ['家', 'jiā', 'home, family'],
+      ['老师', 'lǎoshī', 'teacher'], ['学生', 'xuéshēng', 'student']
+    ] },
+    { id: 'food', zh: '吃喝', title: 'Food and drink', desc: 'What you eat and drink', words: [
+      ['水', 'shuǐ', 'water'], ['茶', 'chá', 'tea'], ['牛奶', 'niúnǎi', 'milk'], ['米饭', 'mǐfàn', 'cooked rice'],
+      ['面条', 'miàntiáo', 'noodles'], ['苹果', 'píngguǒ', 'apple'], ['鸡肉', 'jīròu', 'chicken meat'],
+      ['吃', 'chī', 'to eat'], ['喝', 'hē', 'to drink'], ['好吃', 'hǎochī', 'tasty']
+    ] },
+    { id: 'color', zh: '红蓝', title: 'Colors and sizes', desc: 'Describe things you see', words: [
+      ['红色', 'hóngsè', 'red'], ['蓝色', 'lánsè', 'blue'], ['绿色', 'lǜsè', 'green'], ['黄色', 'huángsè', 'yellow'],
+      ['白色', 'báisè', 'white'], ['黑色', 'hēisè', 'black'], ['大', 'dà', 'big'], ['小', 'xiǎo', 'small']
+    ] },
+    { id: 'sent', kind: 'sent', zh: '我叫', title: 'First sentences', desc: 'Short phrases you can use today', words: [
+      ['你叫什么名字？', 'nǐ jiào shénme míngzi?', "what's your name?"],
+      ['你好吗？', 'nǐ hǎo ma?', 'how are you?'],
+      ['我很好', 'wǒ hěn hǎo', "I'm doing well"],
+      ['我是学生', 'wǒ shì xuéshēng', 'I am a student'],
+      ['我不知道', 'wǒ bù zhīdào', "I don't know"],
+      ['多少钱？', 'duōshao qián?', 'how much is it?'],
+      ['我想喝水', 'wǒ xiǎng hē shuǐ', 'I want to drink water'],
+      ['厕所在哪里？', 'cèsuǒ zài nǎlǐ?', 'where is the toilet?'],
+      ['我爱你', 'wǒ ài nǐ', 'I love you']
+    ] },
+    { id: 'time', part: 2, zh: '今明', title: 'Time and days', desc: 'Today, tomorrow and the time of day', words: [
+      ['今天', 'jīntiān', 'today'], ['明天', 'míngtiān', 'tomorrow'], ['昨天', 'zuótiān', 'yesterday'], ['现在', 'xiànzài', 'now'],
+      ['上午', 'shàngwǔ', 'morning (before noon)'], ['中午', 'zhōngwǔ', 'noon'], ['下午', 'xiàwǔ', 'afternoon'],
+      ['年', 'nián', 'year'], ['月', 'yuè', 'month'], ['星期', 'xīngqī', 'week']
+    ] },
+    { id: 'count', part: 2, zh: '个块', title: 'Counting and money', desc: 'Measure words, dates, ages and prices', words: [
+      ['个', 'gè', 'general measure word'], ['本', 'běn', 'measure word for books'], ['块', 'kuài', 'yuan (kuai)'],
+      ['多少', 'duōshao', 'how many, how much'], ['几', 'jǐ', 'how many (small number)'], ['号', 'hào', 'day of the month'],
+      ['点', 'diǎn', "o'clock"], ['分钟', 'fēnzhōng', 'minute'], ['岁', 'suì', 'years old'], ['钱', 'qián', 'money']
+    ] },
+    { id: 'ask', part: 2, zh: '什么', title: 'Questions and pointing', desc: 'Ask who, what, where and point at things', words: [
+      ['什么', 'shénme', 'what'], ['谁', 'shéi', 'who'], ['哪', 'nǎ', 'which'], ['哪儿', 'nǎr', 'where'],
+      ['怎么', 'zěnme', 'how'], ['怎么样', 'zěnmeyàng', 'how about it, how is it'],
+      ['吗', 'ma', 'yes/no question word'], ['呢', 'ne', 'and you? what about?'], ['这', 'zhè', 'this'], ['那', 'nà', 'that']
+    ] },
+    { id: 'act', part: 2, zh: '看听', title: 'Action verbs', desc: 'Look, listen, speak, go, come and buy', words: [
+      ['看', 'kàn', 'to look, to watch'], ['听', 'tīng', 'to listen'], ['说', 'shuō', 'to speak, to say'], ['读', 'dú', 'to read aloud'],
+      ['写', 'xiě', 'to write'], ['买', 'mǎi', 'to buy'], ['去', 'qù', 'to go'], ['来', 'lái', 'to come'],
+      ['回', 'huí', 'to go back, to return'], ['做', 'zuò', 'to do, to make']
+    ] },
+    { id: 'life', part: 2, zh: '喜欢', title: 'Daily life', desc: 'Work, study, sleep and what you like', words: [
+      ['坐', 'zuò', 'to sit'], ['住', 'zhù', 'to live (at)'], ['开', 'kāi', 'to open, to turn on'], ['睡觉', 'shuìjiào', 'to sleep'],
+      ['工作', 'gōngzuò', 'to work, a job'], ['学习', 'xuéxí', 'to study'], ['喜欢', 'xǐhuan', 'to like'],
+      ['想', 'xiǎng', 'to want, to think'], ['爱', 'ài', 'to love'], ['认识', 'rènshi', 'to know (a person)']
+    ] },
+    { id: 'core', part: 2, zh: '是有', title: 'Core grammar words', desc: 'Be, have, not, very and also', words: [
+      ['是', 'shì', 'to be (is, am, are)'], ['有', 'yǒu', 'to have'], ['没有', 'méiyǒu', "to not have, there isn't"], ['在', 'zài', 'to be at, in, on'],
+      ['不', 'bù', 'not'], ['很', 'hěn', 'very'], ['都', 'dōu', 'all, both'], ['和', 'hé', 'and, with'],
+      ['也', 'yě', 'also, too'], ['太', 'tài', 'too (much)']
+    ] },
+    { id: 'place', part: 2, zh: '学校', title: 'Places and travel', desc: 'Where you go and how you get there', words: [
+      ['学校', 'xuéxiào', 'school'], ['商店', 'shāngdiàn', 'shop, store'], ['饭馆', 'fànguǎn', 'restaurant'], ['医院', 'yīyuàn', 'hospital'],
+      ['中国', 'Zhōngguó', 'China'], ['北京', 'Běijīng', 'Beijing'], ['汉语', 'Hànyǔ', 'Chinese language'],
+      ['飞机', 'fēijī', 'airplane'], ['出租车', 'chūzūchē', 'taxi']
+    ] },
+    { id: 'thing', part: 2, zh: '书', title: 'Things around you', desc: 'Books, furniture, clothes and screens', words: [
+      ['书', 'shū', 'book'], ['电脑', 'diànnǎo', 'computer'], ['电视', 'diànshì', 'television'], ['电影', 'diànyǐng', 'movie'],
+      ['杯子', 'bēizi', 'cup'], ['桌子', 'zhuōzi', 'table'], ['椅子', 'yǐzi', 'chair'], ['衣服', 'yīfu', 'clothes'],
+      ['东西', 'dōngxi', 'thing, stuff'], ['字', 'zì', 'written character']
+    ] },
+    { id: 'folk', part: 2, zh: '人', title: 'People and animals', desc: 'Family, classmates, doctors, a dog and a cat', words: [
+      ['人', 'rén', 'person, people'], ['我们', 'wǒmen', 'we, us'], ['儿子', 'érzi', 'son'], ['女儿', "nǚ'ér", 'daughter'],
+      ['同学', 'tóngxué', 'classmate'], ['先生', 'xiānsheng', 'Mr., sir'], ['小姐', 'xiǎojiě', 'Miss, young lady'],
+      ['医生', 'yīshēng', 'doctor'], ['狗', 'gǒu', 'dog'], ['猫', 'māo', 'cat']
+    ] },
+    { id: 'wthr', part: 2, zh: '天气', title: 'Weather and feelings', desc: 'Hot, cold, happy and pretty', words: [
+      ['天气', 'tiānqì', 'weather'], ['冷', 'lěng', 'cold'], ['热', 'rè', 'hot'], ['下雨', 'xiàyǔ', 'to rain'],
+      ['高兴', 'gāoxìng', 'happy'], ['漂亮', 'piàoliang', 'pretty'], ['多', 'duō', 'many, much'], ['少', 'shǎo', 'few, little'],
+      ['好', 'hǎo', 'good']
+    ] },
+    { id: 'pos', part: 2, zh: '上下', title: 'Position and phone', desc: 'Up, down, inside, in front and a phone call', words: [
+      ['上', 'shàng', 'up, above'], ['下', 'xià', 'down, below'], ['里', 'lǐ', 'inside'], ['前面', 'qiánmian', 'in front'],
+      ['后面', 'hòumian', 'behind'], ['水果', 'shuǐguǒ', 'fruit'], ['菜', 'cài', 'dish, vegetable'],
+      ['打电话', 'dǎ diànhuà', 'to make a phone call'], ['喂', 'wèi', 'hello (on the phone)']
+    ] },
+    { id: 'more', part: 2, zh: '的了', title: 'More useful words', desc: 'Small words that hold sentences together', words: [
+      ['的', 'de', 'of (possessive particle)'], ['了', 'le', 'completed-action particle'], ['会', 'huì', 'can (know how to)'],
+      ['能', 'néng', 'can (be able to)'], ['些', 'xiē', 'some'], ['时候', 'shíhou', 'time, moment'],
+      ['名字', 'míngzi', 'name'], ['看见', 'kànjiàn', 'to see (catch sight of)'], ['叫', 'jiào', 'to be called']
+    ] },
+
+    /* ---------- HSK 2: vocabulary, each word with an example sentence ---------- */
+    { id: 'h2time', part: 3, zh: '早晚', title: 'Morning, evening, often', desc: 'When and how often you do things', words: [
+      ['早上', 'zǎoshang', 'morning', '我早上喝牛奶。', 'wǒ zǎoshang hē niúnǎi.', 'I drink milk in the morning.'],
+      ['晚上', 'wǎnshang', 'evening, night', '我晚上看电视。', 'wǒ wǎnshang kàn diànshì.', 'I watch TV in the evening.'],
+      ['小时', 'xiǎoshí', 'hour', '我睡了八个小时。', 'wǒ shuì le bā ge xiǎoshí.', 'I slept for eight hours.'],
+      ['时间', 'shíjiān', 'time', '你有时间吗？', 'nǐ yǒu shíjiān ma?', 'Do you have time?'],
+      ['经常', 'jīngcháng', 'often', '我经常去跑步。', 'wǒ jīngcháng qù pǎobù.', 'I often go running.'],
+      ['已经', 'yǐjīng', 'already', '他已经回家了。', 'tā yǐjīng huí jiā le.', 'He has already gone home.'],
+      ['一起', 'yìqǐ', 'together', '我们一起去吧。', 'wǒmen yìqǐ qù ba.', "Let's go together."],
+      ['先', 'xiān', 'first', '你先吃吧。', 'nǐ xiān chī ba.', 'You eat first.']
+    ] },
+    { id: 'h2fam', part: 3, zh: '哥姐', title: 'Family and polite words', desc: 'Brothers, sisters, children and polite you', words: [
+      ['哥哥', 'gēge', 'older brother', '我哥哥是医生。', 'wǒ gēge shì yīshēng.', 'My older brother is a doctor.'],
+      ['姐姐', 'jiějie', 'older sister', '我姐姐很漂亮。', 'wǒ jiějie hěn piàoliang.', 'My older sister is pretty.'],
+      ['弟弟', 'dìdi', 'younger brother', '我弟弟喜欢踢足球。', 'wǒ dìdi xǐhuan tī zúqiú.', 'My younger brother likes playing football.'],
+      ['妹妹', 'mèimei', 'younger sister', '我妹妹在学校。', 'wǒ mèimei zài xuéxiào.', 'My younger sister is at school.'],
+      ['孩子', 'háizi', 'child', '这个孩子五岁。', 'zhège háizi wǔ suì.', 'This child is five years old.'],
+      ['大家', 'dàjiā', 'everyone', '大家好！', 'dàjiā hǎo!', 'Hello, everyone!'],
+      ['您', 'nín', 'you (polite)', '老师，您好！', 'lǎoshī, nín hǎo!', 'Hello, teacher!'],
+      ['服务员', 'fúwùyuán', 'waiter, waitress', '服务员，请来一下。', 'fúwùyuán, qǐng lái yíxià.', 'Waiter, please come over.']
+    ] },
+    { id: 'h2desc', part: 3, zh: '高贵', title: 'Describing things', desc: 'Tall, expensive, new, busy, near and far', words: [
+      ['高', 'gāo', 'tall, high', '他很高。', 'tā hěn gāo.', 'He is very tall.'],
+      ['贵', 'guì', 'expensive', '这件衣服太贵了。', 'zhè jiàn yīfu tài guì le.', 'This piece of clothing is too expensive.'],
+      ['便宜', 'piányi', 'cheap', '这里的苹果很便宜。', 'zhèlǐ de píngguǒ hěn piányi.', 'The apples here are cheap.'],
+      ['新', 'xīn', 'new', '我有一个新手机。', 'wǒ yǒu yí ge xīn shǒujī.', 'I have a new phone.'],
+      ['快', 'kuài', 'fast, quick', '请快一点儿。', 'qǐng kuài yìdiǎnr.', 'Please be a bit quicker.'],
+      ['慢', 'màn', 'slow', '他说话很慢。', 'tā shuōhuà hěn màn.', 'He speaks slowly.'],
+      ['忙', 'máng', 'busy', '我今天很忙。', 'wǒ jīntiān hěn máng.', "I'm busy today."],
+      ['累', 'lèi', 'tired', '我很累，想睡觉。', 'wǒ hěn lèi, xiǎng shuìjiào.', "I'm tired and want to sleep."],
+      ['远', 'yuǎn', 'far', '我家离公司很远。', 'wǒ jiā lí gōngsī hěn yuǎn.', 'My home is far from the company.'],
+      ['近', 'jìn', 'near, close', '商店很近。', 'shāngdiàn hěn jìn.', 'The shop is close.']
+    ] },
+    { id: 'h2daily', part: 3, zh: '起床', title: 'Daily routine', desc: 'Get up, go to work, wash, rest and wait', words: [
+      ['起床', 'qǐchuáng', 'to get up', '我七点起床。', 'wǒ qī diǎn qǐchuáng.', 'I get up at seven.'],
+      ['上班', 'shàngbān', 'to go to work', '他八点上班。', 'tā bā diǎn shàngbān.', 'He starts work at eight.'],
+      ['洗', 'xǐ', 'to wash', '我在洗衣服。', 'wǒ zài xǐ yīfu.', "I'm washing clothes."],
+      ['休息', 'xiūxi', 'to rest', '你累了，休息一下吧。', 'nǐ lèi le, xiūxi yíxià ba.', "You're tired, have a rest."],
+      ['找', 'zhǎo', 'to look for', '我在找我的手机。', 'wǒ zài zhǎo wǒ de shǒujī.', "I'm looking for my phone."],
+      ['等', 'děng', 'to wait', '请等一下。', 'qǐng děng yíxià.', 'Please wait a moment.'],
+      ['送', 'sòng', 'to take, to see off', '我送你回家。', 'wǒ sòng nǐ huí jiā.', "I'll take you home."],
+      ['玩', 'wán', 'to play, to have fun', '孩子们在玩。', 'háizimen zài wán.', 'The children are playing.']
+    ] },
+    { id: 'h2fun', part: 3, zh: '唱跳', title: 'Hobbies and sports', desc: 'Sing, dance, swim, run and travel', words: [
+      ['唱歌', 'chànggē', 'to sing', '她喜欢唱歌。', 'tā xǐhuan chànggē.', 'She likes singing.'],
+      ['跳舞', 'tiàowǔ', 'to dance', '我不会跳舞。', 'wǒ bú huì tiàowǔ.', "I can't dance."],
+      ['游泳', 'yóuyǒng', 'to swim', '我想去游泳。', 'wǒ xiǎng qù yóuyǒng.', 'I want to go swimming.'],
+      ['跑步', 'pǎobù', 'to run, to jog', '我每天早上跑步。', 'wǒ měi tiān zǎoshang pǎobù.', 'I run every morning.'],
+      ['旅游', 'lǚyóu', 'to travel', '我喜欢去中国旅游。', 'wǒ xǐhuan qù Zhōngguó lǚyóu.', 'I like to travel in China.'],
+      ['运动', 'yùndòng', 'to exercise, sport', '他每天都运动。', 'tā měi tiān dōu yùndòng.', 'He exercises every day.'],
+      ['踢足球', 'tī zúqiú', 'to play football', '我们星期六踢足球。', 'wǒmen xīngqīliù tī zúqiú.', 'We play football on Saturdays.'],
+      ['打篮球', 'dǎ lánqiú', 'to play basketball', '他喜欢打篮球。', 'tā xǐhuan dǎ lánqiú.', 'He likes playing basketball.']
+    ] },
+    { id: 'h2talk', part: 3, zh: '知懂', title: 'Knowing and talking', desc: 'Know, understand, ask, answer and introduce', words: [
+      ['知道', 'zhīdào', 'to know', '你知道他的名字吗？', 'nǐ zhīdào tā de míngzi ma?', 'Do you know his name?'],
+      ['觉得', 'juéde', 'to feel, to think', '我觉得这个很好。', 'wǒ juéde zhège hěn hǎo.', 'I think this one is good.'],
+      ['懂', 'dǒng', 'to understand', '你懂了吗？', 'nǐ dǒng le ma?', 'Do you understand now?'],
+      ['告诉', 'gàosu', 'to tell', '请告诉我你的名字。', 'qǐng gàosu wǒ nǐ de míngzi.', 'Please tell me your name.'],
+      ['问', 'wèn', 'to ask', '我想问你一个问题。', 'wǒ xiǎng wèn nǐ yí ge wèntí.', 'I want to ask you a question.'],
+      ['回答', 'huídá', 'to answer', '请回答这个问题。', 'qǐng huídá zhège wèntí.', 'Please answer this question.'],
+      ['介绍', 'jièshào', 'to introduce', '我来介绍一下，这是我的朋友。', 'wǒ lái jièshào yíxià, zhè shì wǒ de péngyou.', 'Let me introduce you: this is my friend.'],
+      ['希望', 'xīwàng', 'to hope', '我希望明天不下雨。', 'wǒ xīwàng míngtiān bú xiàyǔ.', "I hope it doesn't rain tomorrow."],
+      ['准备', 'zhǔnbèi', 'to prepare', '我在准备考试。', 'wǒ zài zhǔnbèi kǎoshì.', "I'm preparing for the exam."],
+      ['开始', 'kāishǐ', 'to begin', '现在开始上课。', 'xiànzài kāishǐ shàngkè.', 'Class begins now.']
+    ] },
+    { id: 'h2place', part: 3, zh: '机场', title: 'Places and directions', desc: 'Airport, bus, room, door, left and right', words: [
+      ['机场', 'jīchǎng', 'airport', '我要去机场。', 'wǒ yào qù jīchǎng.', 'I need to go to the airport.'],
+      ['公共汽车', 'gōnggòng qìchē', 'bus', '我坐公共汽车去学校。', 'wǒ zuò gōnggòng qìchē qù xuéxiào.', 'I take the bus to school.'],
+      ['公司', 'gōngsī', 'company', '我在公司工作。', 'wǒ zài gōngsī gōngzuò.', 'I work at a company.'],
+      ['教室', 'jiàoshì', 'classroom', '老师在教室里。', 'lǎoshī zài jiàoshì lǐ.', 'The teacher is in the classroom.'],
+      ['房间', 'fángjiān', 'room', '这个房间很大。', 'zhège fángjiān hěn dà.', 'This room is big.'],
+      ['路', 'lù', 'road, way', '这条路很长。', 'zhè tiáo lù hěn cháng.', 'This road is very long.'],
+      ['门', 'mén', 'door', '请开门。', 'qǐng kāi mén.', 'Please open the door.'],
+      ['旁边', 'pángbiān', 'beside, next to', '商店在学校旁边。', 'shāngdiàn zài xuéxiào pángbiān.', 'The shop is next to the school.'],
+      ['左边', 'zuǒbian', 'left side', '书在桌子左边。', 'shū zài zhuōzi zuǒbian.', 'The book is on the left of the table.'],
+      ['右边', 'yòubian', 'right side', '水在书的右边。', 'shuǐ zài shū de yòubian.', 'The water is on the right of the book.']
+    ] },
+    { id: 'h2food', part: 3, zh: '咖啡', title: 'Food, shopping and health', desc: 'Coffee, eggs, fish, tickets and medicine', words: [
+      ['咖啡', 'kāfēi', 'coffee', '我早上喝咖啡。', 'wǒ zǎoshang hē kāfēi.', 'I drink coffee in the morning.'],
+      ['鸡蛋', 'jīdàn', 'egg', '我吃了两个鸡蛋。', 'wǒ chī le liǎng ge jīdàn.', 'I ate two eggs.'],
+      ['鱼', 'yú', 'fish', '我喜欢吃鱼。', 'wǒ xǐhuan chī yú.', 'I like eating fish.'],
+      ['羊肉', 'yángròu', 'lamb, mutton', '这个羊肉很好吃。', 'zhège yángròu hěn hǎochī.', 'This lamb is delicious.'],
+      ['西瓜', 'xīguā', 'watermelon', '夏天我喜欢吃西瓜。', 'xiàtiān wǒ xǐhuan chī xīguā.', 'In summer I like eating watermelon.'],
+      ['卖', 'mài', 'to sell', '这里卖水果吗？', 'zhèlǐ mài shuǐguǒ ma?', 'Do they sell fruit here?'],
+      ['票', 'piào', 'ticket', '我买了两张票。', 'wǒ mǎi le liǎng zhāng piào.', 'I bought two tickets.'],
+      ['药', 'yào', 'medicine', '你要吃药。', 'nǐ yào chī yào.', 'You need to take medicine.']
+    ] },
+    { id: 'h2body', part: 3, zh: '身体', title: 'Body, weather and clothes', desc: 'Health, eyes, sunny, snow and what to wear', words: [
+      ['身体', 'shēntǐ', 'body, health', '你身体好吗？', 'nǐ shēntǐ hǎo ma?', 'Are you in good health?'],
+      ['眼睛', 'yǎnjing', 'eyes', '她的眼睛很大。', 'tā de yǎnjing hěn dà.', 'Her eyes are big.'],
+      ['晴天', 'qíngtiān', 'sunny day', '明天是晴天。', 'míngtiān shì qíngtiān.', 'Tomorrow will be sunny.'],
+      ['阴天', 'yīntiān', 'cloudy day', '今天是阴天，不太热。', 'jīntiān shì yīntiān, bú tài rè.', 'Today is cloudy, not too hot.'],
+      ['雪', 'xuě', 'snow', '北京下雪了。', 'Běijīng xià xuě le.', 'It snowed in Beijing.'],
+      ['红', 'hóng', 'red', '她穿了一件红衣服。', 'tā chuān le yí jiàn hóng yīfu.', 'She wore a red piece of clothing.'],
+      ['白', 'bái', 'white', '我有一个白杯子。', 'wǒ yǒu yí ge bái bēizi.', 'I have a white cup.'],
+      ['穿', 'chuān', 'to wear', '今天很冷，多穿衣服。', 'jīntiān hěn lěng, duō chuān yīfu.', "It's cold today, wear more clothes."],
+      ['颜色', 'yánsè', 'color', '你喜欢什么颜色？', 'nǐ xǐhuan shénme yánsè?', 'What color do you like?']
+    ] },
+    { id: 'h2link', part: 3, zh: '因为', title: 'Link words and degree', desc: 'Because, so, but, although, really and most', words: [
+      ['因为', 'yīnwèi', 'because', '因为下雨，所以我在家。', 'yīnwèi xiàyǔ, suǒyǐ wǒ zài jiā.', "Because it's raining, I'm staying home."],
+      ['所以', 'suǒyǐ', 'so, therefore', '我很累，所以想早点儿睡。', 'wǒ hěn lèi, suǒyǐ xiǎng zǎodiǎnr shuì.', "I'm tired, so I want to sleep early."],
+      ['但是', 'dànshì', 'but', '我很想去，但是没有时间。', 'wǒ hěn xiǎng qù, dànshì méiyǒu shíjiān.', 'I really want to go, but I have no time.'],
+      ['虽然', 'suīrán', 'although', '虽然很累，但是很高兴。', 'suīrán hěn lèi, dànshì hěn gāoxìng.', "Although I'm tired, I'm happy."],
+      ['还', 'hái', 'still, yet', '他还没回家。', 'tā hái méi huí jiā.', "He hasn't come home yet."],
+      ['就', 'jiù', 'then, right away', '我六点就起床了。', 'wǒ liù diǎn jiù qǐchuáng le.', 'I was already up at six.'],
+      ['真', 'zhēn', 'really', '这个真好吃！', 'zhège zhēn hǎochī!', 'This is really tasty!'],
+      ['非常', 'fēicháng', 'very, extremely', '这里非常漂亮。', 'zhèlǐ fēicháng piàoliang.', "It's extremely beautiful here."],
+      ['最', 'zuì', 'most', '我最喜欢茶。', 'wǒ zuì xǐhuan chá.', 'I like tea the most.'],
+      ['可能', 'kěnéng', 'maybe, might', '明天可能下雨。', 'míngtiān kěnéng xiàyǔ.', 'It may rain tomorrow.'],
+      ['为什么', 'wèishénme', 'why', '你为什么不来？', 'nǐ wèishénme bù lái?', "Why aren't you coming?"]
+    ] },
+
+    /* ---------- HSK 2, Part 2: the remaining words, each with an example sentence ---------- */
+    { id: 'h2num', part: 4, zh: '百千', title: 'Numbers, measures and order', desc: 'Hundreds, thousands, first, times and every', words: [
+      ['零', 'líng', 'zero', '现在是零度，很冷。', 'xiànzài shì líng dù, hěn lěng.', "It's zero degrees now, very cold."],
+      ['百', 'bǎi', 'hundred', '这本书一百块。', 'zhè běn shū yì bǎi kuài.', 'This book is a hundred yuan.'],
+      ['千', 'qiān', 'thousand', '我的手机三千块。', 'wǒ de shǒujī sān qiān kuài.', 'My phone costs three thousand yuan.'],
+      ['两', 'liǎng', 'two (before a measure word)', '我有两个妹妹。', 'wǒ yǒu liǎng ge mèimei.', 'I have two younger sisters.'],
+      ['第一', 'dì-yī', 'first', '这是我第一次来中国。', 'zhè shì wǒ dì-yī cì lái Zhōngguó.', 'This is my first time coming to China.'],
+      ['次', 'cì', 'time, occasion', '我去过两次北京。', 'wǒ qù guo liǎng cì Běijīng.', "I've been to Beijing twice."],
+      ['件', 'jiàn', 'measure word for clothes', '这件衣服很漂亮。', 'zhè jiàn yīfu hěn piàoliang.', 'This piece of clothing is pretty.'],
+      ['每', 'měi', 'every, each', '我每天都喝水。', 'wǒ měi tiān dōu hē shuǐ.', 'I drink water every day.'],
+      ['一下', 'yíxià', 'a little, a moment', '我可以问一下吗？', 'wǒ kěyǐ wèn yíxià ma?', 'Can I ask something quickly?'],
+      ['再', 'zài', 'again', '请再说一次。', 'qǐng zài shuō yí cì.', 'Please say it once more.']
+    ] },
+    { id: 'h2ppl', part: 4, zh: '男女', title: 'People and relationships', desc: 'Husband, wife, male, female, help and smile', words: [
+      ['男', 'nán', 'male', '他是男老师。', 'tā shì nán lǎoshī.', 'He is a male teacher.'],
+      ['女', 'nǚ', 'female', '她是女医生。', 'tā shì nǚ yīshēng.', 'She is a female doctor.'],
+      ['妻子', 'qīzi', 'wife', '他的妻子是老师。', 'tā de qīzi shì lǎoshī.', 'His wife is a teacher.'],
+      ['丈夫', 'zhàngfu', 'husband', '她的丈夫在公司工作。', 'tā de zhàngfu zài gōngsī gōngzuò.', 'Her husband works at a company.'],
+      ['姓', 'xìng', 'surname, to be surnamed', '你姓什么？', 'nǐ xìng shénme?', 'What is your surname?'],
+      ['它', 'tā', 'it (for animals and things)', '这是我的狗，它很大。', 'zhè shì wǒ de gǒu, tā hěn dà.', 'This is my dog, it is big.'],
+      ['帮助', 'bāngzhù', 'help', '谢谢你的帮助。', 'xièxie nǐ de bāngzhù.', 'Thank you for your help.'],
+      ['让', 'ràng', 'to let, to allow', '妈妈不让我玩手机。', 'māma bú ràng wǒ wán shǒujī.', "Mom doesn't let me play on my phone."],
+      ['笑', 'xiào', 'to laugh, to smile', '孩子们都在笑。', 'háizimen dōu zài xiào.', 'The children are all laughing.'],
+      ['快乐', 'kuàilè', 'happy', '祝你生日快乐！', 'zhù nǐ shēngrì kuàilè!', 'Happy birthday to you!']
+    ] },
+    { id: 'h2sch', part: 4, zh: '考试', title: 'School and study', desc: 'Classes, exams, questions, right and wrong', words: [
+      ['课', 'kè', 'class, lesson', '我下午有两节课。', 'wǒ xiàwǔ yǒu liǎng jié kè.', 'I have two classes this afternoon.'],
+      ['考试', 'kǎoshì', 'exam', '明天我有考试。', 'míngtiān wǒ yǒu kǎoshì.', 'I have an exam tomorrow.'],
+      ['题', 'tí', 'question (on a test)', '这个题很难。', 'zhège tí hěn nán.', 'This question is hard.'],
+      ['问题', 'wèntí', 'question, problem', '你有什么问题吗？', 'nǐ yǒu shénme wèntí ma?', 'Do you have any questions?'],
+      ['对', 'duì', 'correct, right', '你说得对。', 'nǐ shuō de duì.', 'You are right.'],
+      ['错', 'cuò', 'wrong', '这个字写错了。', 'zhège zì xiě cuò le.', 'This character is written wrong.'],
+      ['意思', 'yìsi', 'meaning', '这个字是什么意思？', 'zhège zì shì shénme yìsi?', 'What does this character mean?'],
+      ['铅笔', 'qiānbǐ', 'pencil', '我有三支铅笔。', 'wǒ yǒu sān zhī qiānbǐ.', 'I have three pencils.'],
+      ['报纸', 'bàozhǐ', 'newspaper', '爸爸每天看报纸。', 'bàba měi tiān kàn bàozhǐ.', 'Dad reads the newspaper every day.'],
+      ['说话', 'shuōhuà', 'to speak, to talk', '请小声说话。', 'qǐng xiǎo shēng shuōhuà.', 'Please speak quietly.']
+    ] },
+    { id: 'h2evt', part: 4, zh: '去年', title: 'Dates, things and events', desc: 'Last year, birthdays, watches and trains', words: [
+      ['去年', 'qùnián', 'last year', '我去年去了中国。', 'wǒ qùnián qù le Zhōngguó.', 'I went to China last year.'],
+      ['生日', 'shēngrì', 'birthday', '明天是我的生日。', 'míngtiān shì wǒ de shēngrì.', 'Tomorrow is my birthday.'],
+      ['生病', 'shēngbìng', 'to get sick', '他生病了，没来上课。', 'tā shēngbìng le, méi lái shàngkè.', "He is sick and didn't come to class."],
+      ['事情', 'shìqing', 'matter, things to do', '我今天有很多事情。', 'wǒ jīntiān yǒu hěn duō shìqing.', 'I have a lot to do today.'],
+      ['手表', 'shǒubiǎo', 'watch', '我的手表很新。', 'wǒ de shǒubiǎo hěn xīn.', 'My watch is new.'],
+      ['手机', 'shǒujī', 'mobile phone', '我的手机在桌子上。', 'wǒ de shǒujī zài zhuōzi shàng.', 'My phone is on the table.'],
+      ['黑', 'hēi', 'black, dark', '天黑了，我们回家吧。', 'tiān hēi le, wǒmen huí jiā ba.', "It's getting dark, let's go home."],
+      ['火车站', 'huǒchēzhàn', 'train station', '火车站离这里很远。', 'huǒchēzhàn lí zhèlǐ hěn yuǎn.', 'The train station is far from here.']
+    ] },
+    { id: 'h2move', part: 4, zh: '走进', title: 'Movement and direction', desc: 'Walk, enter, arrive, from and toward', words: [
+      ['走', 'zǒu', 'to walk, to go', '我每天走路上班。', 'wǒ měi tiān zǒulù shàngbān.', 'I walk to work every day.'],
+      ['进', 'jìn', 'to enter', '他进了教室。', 'tā jìn le jiàoshì.', 'He went into the classroom.'],
+      ['出', 'chū', 'to go out', '他出去了。', 'tā chūqù le.', 'He went out.'],
+      ['到', 'dào', 'to arrive, to reach', '我八点到公司。', 'wǒ bā diǎn dào gōngsī.', 'I arrive at the company at eight.'],
+      ['从', 'cóng', 'from', '我从北京来。', 'wǒ cóng Běijīng lái.', 'I come from Beijing.'],
+      ['向', 'xiàng', 'toward', '请向右拐。', 'qǐng xiàng yòu guǎi.', 'Please turn right.'],
+      ['外', 'wài', 'outside', '外面在下雨。', 'wàimiàn zài xiàyǔ.', "It's raining outside."],
+      ['长', 'cháng', 'long', '他的头发很长。', 'tā de tóufa hěn cháng.', 'His hair is long.'],
+      ['离', 'lí', 'away from, distance from', '公司离我家不远。', 'gōngsī lí wǒ jiā bù yuǎn.', 'The company is not far from my home.'],
+      ['完', 'wán', 'to finish', '我吃完了。', 'wǒ chī wán le.', "I've finished eating."]
+    ] },
+    { id: 'h2grm', part: 4, zh: '要得', title: 'Little words that matter', desc: 'Small words that go with the grammar page', words: [
+      ['要', 'yào', 'to want, will', '我要一杯咖啡。', 'wǒ yào yì bēi kāfēi.', "I'd like a cup of coffee."],
+      ['可以', 'kěyǐ', 'can, may', '你可以走了。', 'nǐ kěyǐ zǒu le.', 'You may go now.'],
+      ['给', 'gěi', 'to give, for (someone)', '我给妈妈打电话。', 'wǒ gěi māma dǎ diànhuà.', "I'm calling my mom."],
+      ['比', 'bǐ', 'than, compared with', '我比弟弟高。', 'wǒ bǐ dìdi gāo.', "I'm taller than my younger brother."],
+      ['别', 'bié', "don't", '别忘了带手机。', 'bié wàng le dài shǒujī.', "Don't forget to bring your phone."],
+      ['过', 'guo', 'ever (have done before)', '我吃过北京烤鸭。', 'wǒ chī guo Běijīng kǎoyā.', 'I have eaten Peking duck.'],
+      ['得', 'de', 'how well (after a verb)', '他说得很好。', 'tā shuō de hěn hǎo.', 'He speaks very well.'],
+      ['着', 'zhe', 'a state that continues', '门开着。', 'mén kāi zhe.', 'The door is open.'],
+      ['正在', 'zhèngzài', 'in the middle of (doing)', '我正在学汉语。', 'wǒ zhèngzài xué Hànyǔ.', "I'm studying Chinese right now."],
+      ['吧', 'ba', 'suggestion word', '我们回家吧。', 'wǒmen huí jiā ba.', "Let's go home."]
+    ] },
+
+    /* ---------- HSK 2: sentences for daily life ---------- */
+    { id: 's2rest', kind: 'sent', part: 5, zh: '点菜', title: 'At a restaurant', desc: 'Order food, ask for water, pay the bill', words: [
+      ['我要一碗面条。', 'wǒ yào yì wǎn miàntiáo.', "I'd like a bowl of noodles."],
+      ['你们有茶吗？', 'nǐmen yǒu chá ma?', 'Do you have tea?'],
+      ['这个菜很好吃。', 'zhège cài hěn hǎochī.', 'This dish is delicious.'],
+      ['请给我一杯水。', 'qǐng gěi wǒ yì bēi shuǐ.', 'Please give me a glass of water.'],
+      ['不要太辣。', 'bú yào tài là.', 'Not too spicy, please.'],
+      ['我不吃肉。', 'wǒ bù chī ròu.', "I don't eat meat."],
+      ['请买单。', 'qǐng mǎidān.', 'The bill, please.'],
+      ['谢谢，很好吃！', 'xièxie, hěn hǎochī!', 'Thank you, it was delicious!']
+    ] },
+    { id: 's2shop', kind: 'sent', part: 5, zh: '买', title: 'Shopping', desc: 'Ask prices, bargain, try things on and pay', words: [
+      ['这个多少钱？', 'zhège duōshao qián?', 'How much is this?'],
+      ['太贵了，便宜一点儿吧。', 'tài guì le, piányi yìdiǎnr ba.', "It's too expensive, make it a bit cheaper."],
+      ['我想买一件衣服。', 'wǒ xiǎng mǎi yí jiàn yīfu.', 'I want to buy a piece of clothing.'],
+      ['有别的颜色吗？', 'yǒu bié de yánsè ma?', 'Do you have other colors?'],
+      ['可以试一下吗？', 'kěyǐ shì yíxià ma?', 'Can I try it on?'],
+      ['我只看看。', 'wǒ zhǐ kànkan.', "I'm just looking."],
+      ['我要这个。', 'wǒ yào zhège.', "I'll take this one."],
+      ['可以用手机付钱吗？', 'kěyǐ yòng shǒujī fù qián ma?', 'Can I pay with my phone?']
+    ] },
+    { id: 's2go', kind: 'sent', part: 5, zh: '出行', title: 'Getting around', desc: 'Ask the way, take the bus, get off', words: [
+      ['请问，火车站在哪儿？', 'qǐngwèn, huǒchēzhàn zài nǎr?', 'Excuse me, where is the train station?'],
+      ['一直往前走。', 'yìzhí wǎng qián zǒu.', 'Go straight ahead.'],
+      ['在前面往左拐。', 'zài qiánmiàn wǎng zuǒ guǎi.', 'Turn left up ahead.'],
+      ['学校离这里很近。', 'xuéxiào lí zhèlǐ hěn jìn.', 'The school is very close to here.'],
+      ['我坐公共汽车去公司。', 'wǒ zuò gōnggòng qìchē qù gōngsī.', 'I take the bus to the company.'],
+      ['去机场要多长时间？', 'qù jīchǎng yào duō cháng shíjiān?', 'How long does it take to get to the airport?'],
+      ['我们走路去吧。', 'wǒmen zǒulù qù ba.', "Let's walk there."],
+      ['我在这里下车。', 'wǒ zài zhèlǐ xià chē.', "I'm getting off here."]
+    ] },
+    { id: 's2plan', kind: 'sent', part: 5, zh: '计划', title: 'Time and plans', desc: 'Ask the time, make plans, say sorry for being late', words: [
+      ['现在几点？', 'xiànzài jǐ diǎn?', 'What time is it now?'],
+      ['你明天有时间吗？', 'nǐ míngtiān yǒu shíjiān ma?', 'Are you free tomorrow?'],
+      ['我们星期六一起去玩吧。', 'wǒmen xīngqīliù yìqǐ qù wán ba.', "Let's go out together on Saturday."],
+      ['我每天早上六点起床。', 'wǒ měi tiān zǎoshang liù diǎn qǐchuáng.', 'I get up at six every morning.'],
+      ['你什么时候下班？', 'nǐ shénme shíhou xiàbān?', 'When do you finish work?'],
+      ['我已经吃饭了。', 'wǒ yǐjīng chī fàn le.', "I've already eaten."],
+      ['对不起，我来晚了。', 'duìbuqǐ, wǒ lái wǎn le.', "Sorry, I'm late."],
+      ['明天见！', 'míngtiān jiàn!', 'See you tomorrow!']
+    ] },
+    { id: 's2health', kind: 'sent', part: 5, zh: '头疼', title: 'Health and feelings', desc: 'Say how you feel and what hurts', words: [
+      ['你怎么了？', 'nǐ zěnme le?', "What's wrong?"],
+      ['我头疼。', 'wǒ tóu téng.', 'I have a headache.'],
+      ['我有点儿累。', 'wǒ yǒudiǎnr lèi.', "I'm a little tired."],
+      ['我生病了，想休息一下。', 'wǒ shēngbìng le, xiǎng xiūxi yíxià.', "I'm sick and want to rest a bit."],
+      ['你应该多喝水。', 'nǐ yīnggāi duō hē shuǐ.', 'You should drink more water.'],
+      ['别担心，没问题。', 'bié dānxīn, méi wèntí.', "Don't worry, no problem."],
+      ['今天我很高兴。', 'jīntiān wǒ hěn gāoxìng.', "I'm very happy today."],
+      ['生日快乐！', 'shēngrì kuàilè!', 'Happy birthday!']
+    ] },
+    { id: 's2phone', kind: 'sent', part: 5, zh: '电话', title: 'Phone and chat', desc: 'Answer a call, ask someone to repeat or speak slowly', words: [
+      ['喂，你在哪儿？', 'wèi, nǐ zài nǎr?', 'Hello, where are you?'],
+      ['我在路上，马上到。', 'wǒ zài lùshang, mǎshàng dào.', "I'm on the way, I'll be there soon."],
+      ['请再说一遍。', 'qǐng zài shuō yí biàn.', 'Please say it once more.'],
+      ['我听不懂。', 'wǒ tīng bu dǒng.', "I can't understand what I hear."],
+      ['请说慢一点儿。', 'qǐng shuō màn yìdiǎnr.', 'Please speak a little slower.'],
+      ['你会说英语吗？', 'nǐ huì shuō Yīngyǔ ma?', 'Can you speak English?'],
+      ['这个字怎么读？', 'zhège zì zěnme dú?', 'How do you read this character?'],
+      ['我的手机没电了。', 'wǒ de shǒujī méi diàn le.', 'My phone is out of battery.']
+    ] },
+    { id: 's2work', kind: 'sent', part: 5, zh: '工作', title: 'School and work', desc: 'Class, exams, study and your job', words: [
+      ['今天有汉语课。', 'jīntiān yǒu Hànyǔ kè.', 'We have Chinese class today.'],
+      ['我每天学习一个小时。', 'wǒ měi tiān xuéxí yí ge xiǎoshí.', 'I study for an hour every day.'],
+      ['明天有考试，我要准备一下。', 'míngtiān yǒu kǎoshì, wǒ yào zhǔnbèi yíxià.', 'I have an exam tomorrow, so I need to prepare.'],
+      ['老师问我一个问题。', 'lǎoshī wèn wǒ yí ge wèntí.', 'The teacher asked me a question.'],
+      ['我的工作很忙。', 'wǒ de gōngzuò hěn máng.', 'My work is very busy.'],
+      ['我们公司在北京。', 'wǒmen gōngsī zài Běijīng.', 'Our company is in Beijing.'],
+      ['请你帮助我，好吗？', 'qǐng nǐ bāngzhù wǒ, hǎo ma?', 'Could you help me, please?'],
+      ['我在学做中国菜。', 'wǒ zài xué zuò Zhōngguó cài.', "I'm learning to cook Chinese food."]
+    ] },
+    { id: 's2home', kind: 'sent', part: 5, zh: '家人', title: 'Home and family', desc: 'Talk about your family, dinner and your room', words: [
+      ['我家有四口人。', 'wǒ jiā yǒu sì kǒu rén.', 'There are four people in my family.'],
+      ['我有一个弟弟和一个妹妹。', 'wǒ yǒu yí ge dìdi hé yí ge mèimei.', 'I have a younger brother and a younger sister.'],
+      ['爸爸在看报纸。', 'bàba zài kàn bàozhǐ.', 'Dad is reading the newspaper.'],
+      ['妈妈正在做饭。', 'māma zhèngzài zuòfàn.', 'Mom is cooking.'],
+      ['我们一起吃晚饭吧。', 'wǒmen yìqǐ chī wǎnfàn ba.', "Let's have dinner together."],
+      ['请进，请坐。', 'qǐng jìn, qǐng zuò.', 'Please come in and sit down.'],
+      ['我的房间很小。', 'wǒ de fángjiān hěn xiǎo.', 'My room is small.'],
+      ['我饿了。', 'wǒ è le.', "I'm hungry."]
+    ] }
+  ];
+
+  var PARTS = {
+    1: { title: 'HSK 1, Part 1', desc: 'Greetings, numbers, family, food and your first sentences.' },
+    2: { title: 'HSK 1, Part 2', desc: 'The rest of the standard 150-word HSK 1 list: time, questions, verbs, places and more.' },
+    3: { title: 'HSK 2, Part 1', desc: 'Words with example sentences: time, family, describing things, daily life and more.' },
+    4: { title: 'HSK 2, Part 2', desc: 'The rest of the HSK 2 words, also with example sentences.' },
+    5: { title: 'HSK 2, everyday sentences', desc: 'Short sentences for the restaurant, shops, travel, health and home.' }
+  };
+  var ALL = [], BY = {};
+  UNITS.forEach(function (u) {
+    u.part = u.part || 1;
+    u.words = u.words.map(function (a, i) {
+      var w = { id: u.id + i, unit: u.id, zh: a[0], py: a[1], en: a[2] };
+      if (a[3]) w.ex = { zh: a[3], py: a[4], en: a[5] };
+      ALL.push(w); BY[w.id] = w; return w;
+    });
+  });
+
+  var KEY = 'xiaobu-chinese-v1';
+  var P = { known: {}, stars: {}, pinyin: true };
+  try {
+    var raw = localStorage.getItem(KEY);
+    if (raw) { var o = JSON.parse(raw); if (o && typeof o === 'object') { P.known = o.known || {}; P.stars = o.stars || {}; P.pinyin = o.pinyin !== false; } }
+  } catch (e) {}
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(P)); } catch (e) {} }
+
+  var S = { view: 'home', unit: null, tab: 'words', cards: null, quiz: null };
+  var app = document.getElementById('app');
+  var toastEl = document.getElementById('toast');
+  var toastTimer;
+
+  var ICON = {
+    speaker: '<svg class="i" viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>',
+    back: '<svg class="i" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>'
+  };
+
+  function rand(n) { return Math.floor(Math.random() * n); }
+  function shuffle(a) { for (var i = a.length - 1; i > 0; i--) { var j = rand(i + 1), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+  function unitMeta(id) {
+    if (id === 'mix') return { id: 'mix', title: 'Mixed practice', words: ALL };
+    for (var i = 0; i < UNITS.length; i++) if (UNITS[i].id === id) return UNITS[i];
+  }
+  function wordsOf(id) { return unitMeta(id).words; }
+  function knownCount(ws) { return ws.filter(function (w) { return P.known[w.id]; }).length; }
+  function cls(w) { return w.zh.length > 8 ? ' long xl' : w.zh.length > 4 ? ' long' : ''; }
+  function exBtn(w) {
+    if (!w.ex) return '';
+    return '<button class="exbtn" type="button" data-act="sayex" data-id="' + w.id + '" aria-label="Play example sentence"><span class="exb"><span class="zh exz" lang="zh-CN">' + w.ex.zh +
+      '</span><span class="exp">' + w.ex.py + '</span><span class="exe">' + w.ex.en + '</span></span>' + ICON.speaker + '</button>';
+  }
+  function pyHtml(w) { return P.pinyin ? '<div class="py">' + w.py + '</div>' : ''; }
+
+  function toast(msg) {
+    toastEl.textContent = msg; toastEl.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.hidden = true; }, 3200);
+  }
+  function zhVoice() {
+    if (!('speechSynthesis' in window)) return null;
+    var vs = speechSynthesis.getVoices() || [];
+    for (var i = 0; i < vs.length; i++) if (/^zh/i.test(vs[i].lang)) return vs[i];
+    return null;
+  }
+  function speak(text) {
+    if (!('speechSynthesis' in window)) { toast('Sound is not available on this device.'); return; }
+    var v = zhVoice();
+    var any = (speechSynthesis.getVoices() || []).length > 0;
+    if (any && !v) toast('No Chinese voice found. Add one in your device text-to-speech settings.');
+    try {
+      speechSynthesis.cancel();
+      var u = new SpeechSynthesisUtterance(text);
+      u.lang = 'zh-CN'; u.rate = 0.8;
+      if (v) u.voice = v;
+      speechSynthesis.speak(u);
+    } catch (e) {}
+  }
+
+  /* ---------- views ---------- */
+  function homeV() {
+    var total = ALL.length, known = knownCount(ALL);
+    var pct = Math.round(known / total * 100);
+    var h = '<div class="topbar"><div class="brand"><span class="zh" lang="zh-CN">小步</span>Xiaobu</div>' +
+      '<button class="toggle" type="button" data-act="pinyin" aria-pressed="' + P.pinyin + '">Pinyin ' + (P.pinyin ? 'on' : 'off') + '</button></div>';
+    h += '<section class="hero"><p class="eyebrow">xiǎo bù, a small step</p><h1>Learn Chinese one small step at a time</h1>' +
+      '<p class="lede">Hear each word, flip flashcards, then test yourself. Start with the four tones, then work through HSK 1 and HSK 2. HSK 2 lessons have example sentences, and the grammar page explains each pattern simply.</p>' +
+      '<div class="meter"><div class="bar"><i style="width:' + pct + '%"></i></div><span>' + known + ' of ' + total + ' words and phrases learned</span></div></section>';
+    h += '<button class="unit tone-link" type="button" data-act="tones"><span class="glyph zh" lang="zh-CN">声</span><span class="meta"><span class="t">Start here: the four tones</span><span class="d">The same sound can mean four different things. See and hear how.</span></span></button>';
+    h += '<button class="unit tone-link" type="button" data-act="grammar"><span class="glyph zh" lang="zh-CN">语法</span><span class="meta"><span class="t">Grammar made simple</span><span class="d">16 patterns explained in plain English, with sentences you can hear.</span></span></button>';
+    var lastPart = 0;
+    UNITS.forEach(function (u) {
+      if (u.part !== lastPart) {
+        if (lastPart) h += '</div>';
+        lastPart = u.part;
+        h += '<div class="partHead"><h2>' + PARTS[u.part].title + '</h2><p class="lede">' + PARTS[u.part].desc + '</p></div><div class="units">';
+      }
+      var k = knownCount(u.words), p = Math.round(k / u.words.length * 100), st = P.stars[u.id] || 0;
+      h += '<button class="unit" type="button" data-act="unit" data-id="' + u.id + '"><span class="glyph" lang="zh-CN">' + u.zh + '</span><span class="meta"><span class="t">' + u.title + (u.kind === 'sent' ? ' <span class="tag">Sentences</span>' : u.words[0].ex ? ' <span class="tag">Words + examples</span>' : '') + '</span><span class="d">' + u.desc + '</span>' +
+        '<span class="foot"><span class="bar"><i style="width:' + p + '%"></i></span><span>' + k + '/' + u.words.length + '</span><span class="stars" aria-label="' + st + ' of 3 stars">' + '★'.repeat(st) + '☆'.repeat(3 - st) + '</span></span></span></button>';
+    });
+    h += '</div><button class="btn" type="button" data-act="mix">Mixed practice, all lessons</button>';
+    return h;
+  }
+
+  function unitV() {
+    var u = unitMeta(S.unit), mix = S.unit === 'mix';
+    var tabs = mix ? ['cards', 'quiz'] : ['words', 'cards', 'quiz'];
+    var names = { words: 'Words', cards: 'Cards', quiz: 'Quiz' };
+    if (S.tab === 'cards' && !S.cards) startCards();
+    if (S.tab === 'quiz' && !S.quiz) startQuiz();
+    var h = '<div class="topbar"><button class="back" type="button" data-act="home">' + ICON.back + 'Lessons</button>' +
+      '<button class="toggle" type="button" data-act="pinyin" aria-pressed="' + P.pinyin + '">Pinyin ' + (P.pinyin ? 'on' : 'off') + '</button></div>';
+    h += '<h2>' + u.title + '</h2>';
+    h += '<div class="tabs" role="tablist">' + tabs.map(function (t) {
+      return '<button type="button" role="tab" data-act="tab" data-id="' + t + '" aria-selected="' + (S.tab === t) + '">' + names[t] + '</button>';
+    }).join('') + '</div>';
+    if (S.tab === 'words') h += wordsV(u);
+    else if (S.tab === 'cards') h += cardsV();
+    else h += quizV();
+    return h;
+  }
+
+  function wordsV(u) {
+    return '<div class="words">' + u.words.map(function (w) {
+      return '<div class="word"><div><div class="zh' + cls(w) + '" lang="zh-CN">' + w.zh + '</div><div class="py">' + w.py + '</div><div class="en">' + w.en + '</div>' + exBtn(w) + '</div>' +
+        '<div class="acts">' + (P.known[w.id] ? '<span class="stamp" lang="zh-CN" title="Learned">会</span>' : '') +
+        '<button class="icon-btn" type="button" data-act="say" data-id="' + w.id + '" aria-label="Play ' + w.en + '">' + ICON.speaker + '</button></div></div>';
+    }).join('') + '</div>';
+  }
+
+  function startCards() {
+    var ws = shuffle(wordsOf(S.unit).slice());
+    S.cards = { queue: ws.map(function (w) { return w.id; }), flipped: false, done: 0, total: ws.length };
+  }
+
+  function cardsV() {
+    var c = S.cards;
+    if (!c.queue.length) {
+      return '<div class="result"><div class="stamp lg" lang="zh-CN">好</div><h2>Deck complete</h2><p class="lede">You marked all ' + c.total + ' cards as learned. Try the quiz next.</p>' +
+        '<div class="row"><button class="btn" type="button" data-act="tab" data-id="quiz">Take the quiz</button><button class="btn line" type="button" data-act="restartCards">Go again</button></div></div>';
+    }
+    var w = BY[c.queue[0]];
+    var h = '<div class="count"><span>Card ' + (c.done + 1) + ' of ' + c.total + '</span><span>' + c.queue.length + ' left</span></div>';
+    h += '<button class="flash" type="button" data-act="flip" aria-label="Flip card">';
+    if (!c.flipped) {
+      h += '<div class="zh' + cls(w) + '" lang="zh-CN">' + w.zh + '</div>' + (P.pinyin ? '<div class="py">' + w.py + '</div>' : '') + '<div class="tap">Tap to see the answer</div>';
+    } else {
+      h += '<div class="zh' + cls(w) + '" lang="zh-CN">' + w.zh + '</div><div class="py-big">' + w.py + '</div><div class="en-big">' + w.en + '</div>';
+      if (w.ex) h += '<div class="exbox"><div class="zh exz2" lang="zh-CN">' + w.ex.zh + '</div><div class="exp">' + w.ex.py + '</div><div class="exe">' + w.ex.en + '</div></div>';
+    }
+    h += '</button><div class="row"><button class="btn ghost" type="button" data-act="say" data-id="' + w.id + '">' + ICON.speaker + 'Listen</button>' +
+      (w.ex && c.flipped ? '<button class="btn ghost" type="button" data-act="sayex" data-id="' + w.id + '">' + ICON.speaker + 'Hear sentence</button>' : '') + '</div>';
+    if (c.flipped) {
+      h += '<div class="row"><button class="btn line" type="button" data-act="again">Again</button><button class="btn" type="button" data-act="got">Got it</button></div>';
+    }
+    return h;
+  }
+
+  function canListen() { return !!zhVoice(); }
+
+  function startQuiz() {
+    var pool = wordsOf(S.unit);
+    var n = S.unit === 'mix' ? 10 : Math.min(8, pool.length);
+    var types = ['meaning', 'hanzi'];
+    if (canListen()) types.push('listen');
+    var qs = shuffle(pool.slice()).slice(0, n).map(function (w) {
+      var ts = types.slice();
+      if (w.ex) ts.push('cloze', 'cloze');
+      var t = ts[rand(ts.length)];
+      var seen = {}; seen[w.en] = true;
+      var others = [];
+      shuffle(pool.slice()).forEach(function (x) {
+        if (others.length >= 3 || seen[x.en] || (t === 'listen' && x.py === w.py)) return;
+        seen[x.en] = true; others.push(x);
+      });
+      return { w: w, t: t, opts: shuffle([w].concat(others)) };
+    });
+    S.quiz = { qs: qs, i: 0, score: 0, picked: null, done: false, stars: 0 };
+  }
+
+  function quizV() {
+    var q = S.quiz;
+    if (q.done) {
+      var pct = q.score / q.qs.length, pass = pct >= 0.7;
+      return '<div class="result">' + (pass ? '<div class="stamp lg" lang="zh-CN">好</div>' : '') +
+        '<div class="score">' + q.score + ' / ' + q.qs.length + '</div><div class="stars" style="font-size:1.6rem">' + '★'.repeat(q.stars) + '☆'.repeat(3 - q.stars) + '</div>' +
+        '<h2>' + (pct >= 0.9 ? 'Excellent' : pass ? 'Well done' : 'Keep practicing') + '</h2>' +
+        '<p class="lede">' + (pass ? 'You are getting these. Try another lesson or run it again for 3 stars.' : 'Review the words and cards, then try again. Repeating is how it sticks.') + '</p>' +
+        '<div class="row"><button class="btn" type="button" data-act="retry">Try again</button><button class="btn line" type="button" data-act="home">All lessons</button></div></div>';
+    }
+    var c = q.qs[q.i], w = c.w, picked = q.picked;
+    var h = '<div class="count"><span>Question ' + (q.i + 1) + ' of ' + q.qs.length + '</span><span>Score ' + q.score + '</span></div>';
+    h += '<div class="bar"><i style="width:' + Math.round(q.i / q.qs.length * 100) + '%"></i></div><div class="qcard">';
+    if (c.t === 'meaning') h += '<p class="q-label">What does this mean?</p><div class="zh' + cls(w) + '" lang="zh-CN">' + w.zh + '</div>' + (P.pinyin ? '<div class="py" style="color:var(--accent);font-weight:600">' + w.py + '</div>' : '');
+    else if (c.t === 'hanzi') h += '<p class="q-label">Which one means</p><div class="en-big">' + w.en + '</div>';
+    else if (c.t === 'cloze') h += '<p class="q-label">Fill in the blank</p><div class="zh cloze" lang="zh-CN">' + w.ex.zh.replace(w.zh, '<span class="blank">＿＿</span>') + '</div><div class="en-big sm">' + w.ex.en + '</div>';
+    else h += '<p class="q-label">Listen, then choose the meaning</p><button class="btn ghost" type="button" data-act="playq">' + ICON.speaker + 'Play sound</button>';
+    h += '</div><div class="opts">';
+    c.opts.forEach(function (o) {
+      var state = '';
+      var mark = '';
+      if (picked) {
+        if (o.id === w.id) { state = ' ok'; mark = '✓ '; }
+        else if (o.id === picked) { state = ' bad'; mark = '✗ '; }
+        else state = ' dim';
+      }
+      var body = (c.t === 'hanzi' || c.t === 'cloze')
+        ? '<span class="zh" lang="zh-CN">' + mark + o.zh + '</span>' + (P.pinyin || picked ? '<small>' + o.py + '</small>' : '')
+        : '<span>' + mark + o.en + '</span>';
+      h += '<button class="opt' + state + '" type="button" data-act="pick" data-id="' + o.id + '"' + (picked ? ' disabled' : '') + '>' + body + '</button>';
+    });
+    h += '</div>';
+    if (picked) {
+      h += picked === w.id
+        ? '<p class="fb ok">Correct!' + (c.t === 'cloze' ? ' <span lang="zh-CN">' + w.ex.zh + '</span> ' + w.ex.py : '') + '</p>'
+        : '<p class="fb bad">Not quite. <span lang="zh-CN">' + w.zh + '</span> (' + w.py + ') means "' + w.en + '".' + (c.t === 'cloze' ? ' <span lang="zh-CN">' + w.ex.zh + '</span> ' + w.ex.py : '') + '</p>';
+      h += '<button class="btn" type="button" data-act="next">' + (q.i + 1 === q.qs.length ? 'See results' : 'Next') + '</button>';
+    }
+    return h;
+  }
+
+  function tonesV() {
+    var T = [
+      { n: '1st tone', d: 'high and flat', path: 'M10 12 L110 12', zh: '妈', py: 'mā', en: 'mother' },
+      { n: '2nd tone', d: 'rising, like a question', path: 'M10 42 L110 12', zh: '麻', py: 'má', en: 'hemp' },
+      { n: '3rd tone', d: 'dips down, then up', path: 'M10 54 L45 68 L110 28', zh: '马', py: 'mǎ', en: 'horse' },
+      { n: '4th tone', d: 'sharp and falling', path: 'M10 12 L110 68', zh: '骂', py: 'mà', en: 'to scold' }
+    ];
+    var h = '<div class="topbar"><button class="back" type="button" data-act="home">' + ICON.back + 'Lessons</button></div>';
+    h += '<section class="hero"><p class="eyebrow">Before anything else</p><h1>The four tones</h1><p class="lede">Mandarin changes meaning with the pitch of your voice. The sound "ma" below is the same four times, only the pitch changes. Tap the speaker to hear each one.</p></section>';
+    h += '<div class="tones">' + T.map(function (t) {
+      return '<div class="tone"><span class="name">' + t.n + '</span>' +
+        '<svg class="chart" viewBox="0 0 120 80" role="img" aria-label="Pitch shape of the ' + t.n + ': ' + t.d + '">' +
+        '<g stroke="currentColor" stroke-opacity="0.18" stroke-width="1"><line x1="0" y1="12" x2="120" y2="12"/><line x1="0" y1="26" x2="120" y2="26"/><line x1="0" y1="40" x2="120" y2="40"/><line x1="0" y1="54" x2="120" y2="54"/><line x1="0" y1="68" x2="120" y2="68"/></g>' +
+        '<path d="' + t.path + '" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>' +
+        '<circle cx="' + t.path.split(' ')[0].slice(1) + '" cy="' + t.path.split(' ')[1] + '" r="6" fill="currentColor"/></svg>' +
+        '<span class="mean">' + t.d + '</span>' +
+        '<div class="ex"><span class="zh" lang="zh-CN">' + t.zh + '</span><b>' + t.py + '</b><button class="icon-btn" type="button" data-act="say" data-say="' + t.zh + '" aria-label="Play ' + t.py + '">' + ICON.speaker + '</button></div>' +
+        '<span class="mean">' + t.en + '</span></div>';
+    }).join('') + '</div>';
+    h += '<div class="tip"><b>Neutral tone</b><span>Some syllables are short and light, with no tone mark, like the second part of 妈妈 (māma) or the question word 吗 (ma).</span></div>';
+    h += '<div class="tip"><b>Two 3rd tones in a row</b><span>The first one is spoken as a 2nd tone. So 你好 is written nǐ hǎo but said like ní hǎo.</span></div>';
+    h += '<button class="btn" type="button" data-act="unit" data-id="hello">Start with greetings</button>';
+    return h;
+  }
+
+  var GR = [
+    { t: 'Comparing with 比', pat: 'A + 比 + B + adjective',
+      why: 'Use 比 (bǐ) to say one thing is more than another. The adjective goes at the end. Do not add 很 (very) before it.',
+      ex: [['我比他高。', 'wǒ bǐ tā gāo.', 'I am taller than him.'], ['今天比昨天冷。', 'jīntiān bǐ zuótiān lěng.', 'Today is colder than yesterday.'], ['这个比那个便宜。', 'zhège bǐ nàge piányi.', 'This one is cheaper than that one.']] },
+    { t: 'Because, so', pat: '因为 + reason，所以 + result',
+      why: 'In English you say "because" or "so", not both. In Chinese you can use both in one sentence. 因为 (yīnwèi) gives the reason and 所以 (suǒyǐ) gives the result.',
+      ex: [['因为下雨，所以我在家。', 'yīnwèi xiàyǔ, suǒyǐ wǒ zài jiā.', "Because it's raining, I'm staying home."], ['因为我很忙，所以不能去。', 'yīnwèi wǒ hěn máng, suǒyǐ bù néng qù.', "Because I'm busy, I can't go."]] },
+    { t: 'Although, but', pat: '虽然 + A，但是 + B',
+      why: '虽然 (suīrán) means "although" and 但是 (dànshì) means "but". Like the last point, Chinese uses both together.',
+      ex: [['虽然很贵，但是很好吃。', 'suīrán hěn guì, dànshì hěn hǎochī.', "Although it's expensive, it's tasty."], ['虽然他很小，但是他会说汉语。', 'suīrán tā hěn xiǎo, dànshì tā huì shuō Hànyǔ.', "Although he is little, he can speak Chinese."]] },
+    { t: 'Have you ever? with 过', pat: 'verb + 过   |   没 + verb + 过',
+      why: 'Add 过 (guo) after a verb to say you have done something before. To say "never", put 没 before the verb and keep 过.',
+      ex: [['我去过北京。', 'wǒ qù guo Běijīng.', 'I have been to Beijing.'], ['我没吃过羊肉。', 'wǒ méi chī guo yángròu.', 'I have never eaten lamb.'], ['你学过汉语吗？', 'nǐ xué guo Hànyǔ ma?', 'Have you studied Chinese before?']] },
+    { t: 'Doing it right now', pat: 'subject + 正在 / 在 + verb',
+      why: 'Put 正在 (zhèngzài) or 在 (zài) before a verb to say it is happening right now. Chinese has no "-ing" ending.',
+      ex: [['我正在吃饭。', 'wǒ zhèngzài chī fàn.', "I'm eating right now."], ['他在看电视。', 'tā zài kàn diànshì.', 'He is watching TV.'], ['妈妈正在做饭。', 'māma zhèngzài zuòfàn.', 'Mom is cooking.']] },
+    { t: 'Finished actions with 了', pat: 'verb + 了 (+ amount + noun)',
+      why: 'Add 了 (le) after a verb to show the action is done. It marks "finished", so it is not the same as the English past tense.',
+      ex: [['我买了一本书。', 'wǒ mǎi le yì běn shū.', 'I bought a book.'], ['我吃了早饭。', 'wǒ chī le zǎofàn.', 'I ate breakfast.']] },
+    { t: 'About to happen', pat: '要 + verb + 了',
+      why: 'Use 要 ... 了 (yào ... le) to say something will happen very soon. Think "is about to".',
+      ex: [['要下雨了。', 'yào xiàyǔ le.', "It's about to rain."], ['我们要到了。', 'wǒmen yào dào le.', "We're about to arrive."], ['车要开了。', 'chē yào kāi le.', 'The bus is about to leave.']] },
+    { t: 'How well? with 得', pat: 'verb + 得 + adjective',
+      why: 'To say how well or how fast someone does something, put 得 (de) after the verb, then the adjective.',
+      ex: [['她唱得很好。', 'tā chàng de hěn hǎo.', 'She sings very well.'], ['他跑得很快。', 'tā pǎo de hěn kuài.', 'He runs very fast.'], ['我说得不好。', 'wǒ shuō de bù hǎo.', "I don't speak well."]] },
+    { t: 'Three ways to say can', pat: '会 = learned skill   |   能 = able to   |   可以 = allowed to',
+      why: '会 (huì) is a skill you learned, like speaking Chinese. 能 (néng) is being able to do something in a situation. 可以 (kěyǐ) is being allowed to do something.',
+      ex: [['我会说汉语。', 'wǒ huì shuō Hànyǔ.', 'I can speak Chinese (I learned it).'], ['我今天不能来。', 'wǒ jīntiān bù néng lái.', "I can't come today."], ['这里可以坐吗？', 'zhèlǐ kěyǐ zuò ma?', 'May I sit here?']] },
+    { t: 'Telling someone not to', pat: '别 + verb',
+      why: 'Put 别 (bié) before a verb to say "don\'t". It is short and very common in daily speech.',
+      ex: [['别走。', 'bié zǒu.', "Don't go."], ['别担心。', 'bié dānxīn.', "Don't worry."], ['别说话。', 'bié shuōhuà.', "Don't talk."]] },
+    { t: 'Suggestions with 吧', pat: 'sentence + 吧',
+      why: 'Add 吧 (ba) at the end of a sentence to make a suggestion or a soft request. It can mean "let\'s" or "how about".',
+      ex: [['我们走吧。', 'wǒmen zǒu ba.', "Let's go."], ['你先吃吧。', 'nǐ xiān chī ba.', 'You go ahead and eat.'], ['好吧。', 'hǎo ba.', 'Okay then.']] },
+    { t: 'A little, a moment: 一下', pat: 'verb + 一下',
+      why: 'After a verb, 一下 (yíxià) means "a little" or "for a moment". It makes requests sound softer and more polite.',
+      ex: [['请等一下。', 'qǐng děng yíxià.', 'Please wait a moment.'], ['我看一下。', 'wǒ kàn yíxià.', 'Let me take a look.'], ['我来介绍一下。', 'wǒ lái jièshào yíxià.', 'Let me introduce.']] },
+    { t: 'Distance and range', pat: 'A + 离 + B + far/near   |   从 A 到 B',
+      why: 'Use 离 (lí) for the distance between two places. Use 从 (cóng) ... 到 (dào) for "from ... to ...", for places or for time.',
+      ex: [['我家离学校很近。', 'wǒ jiā lí xuéxiào hěn jìn.', 'My home is close to school.'], ['从我家到公司要一个小时。', 'cóng wǒ jiā dào gōngsī yào yí ge xiǎoshí.', 'From my home to the company takes an hour.'], ['我从八点工作到五点。', 'wǒ cóng bā diǎn gōngzuò dào wǔ diǎn.', 'I work from eight to five.']] },
+    { t: 'Two: 两 or 二?', pat: '两 + measure word   |   二 for counting and numbers',
+      why: 'Both mean "two". Use 两 (liǎng) before a measure word. Use 二 (èr) when counting, in numbers like 20, and in dates.',
+      ex: [['我有两个孩子。', 'wǒ yǒu liǎng ge háizi.', 'I have two children.'], ['现在是二月。', 'xiànzài shì èr yuè.', "It's February now."], ['我二十岁。', 'wǒ èrshí suì.', "I'm twenty years old."]] },
+    { t: 'Doing it for someone: 给', pat: '给 + person + verb',
+      why: 'Put 给 (gěi) before a person to say you do something "to" or "for" them. On its own, 给 also means "to give".',
+      ex: [['我给你打电话。', 'wǒ gěi nǐ dǎ diànhuà.', "I'll call you."], ['妈妈给我做饭。', 'māma gěi wǒ zuòfàn.', 'Mom cooks for me.'], ['请给我一杯茶。', 'qǐng gěi wǒ yì bēi chá.', 'Please give me a cup of tea.']] },
+    { t: 'Measure words', pat: 'number + measure word + noun',
+      why: 'Chinese puts a measure word between a number and a noun. 个 (gè) works for many things. Others: 杯 (bēi) for cups, 本 (běn) for books, 件 (jiàn) for clothes, 张 (zhāng) for tickets.',
+      ex: [['一杯茶', 'yì bēi chá', 'a cup of tea'], ['一本书', 'yì běn shū', 'a book'], ['一件衣服', 'yí jiàn yīfu', 'a piece of clothing'], ['两张票', 'liǎng zhāng piào', 'two tickets'], ['三个人', 'sān ge rén', 'three people']] }
+  ];
+
+  function grammarV() {
+    var h = '<div class="topbar"><button class="back" type="button" data-act="home">' + ICON.back + 'Lessons</button></div>';
+    h += '<section class="hero"><p class="eyebrow">Plain-English grammar</p><h1>Grammar made simple</h1>' +
+      '<p class="lede">Chinese has no verb endings and no plurals, so the rules are short. Open a point, read the pattern, then tap each sentence to hear it.</p></section>';
+    h += GR.map(function (g) {
+      return '<details class="g"><summary><span class="gt">' + g.t + '</span><span class="gp">' + g.pat + '</span></summary><div class="gb"><p class="why">' + g.why + '</p>' +
+        g.ex.map(function (e) {
+          return '<div class="gex"><div class="exb"><span class="zh exz" lang="zh-CN">' + e[0] + '</span><span class="exp">' + e[1] + '</span><span class="exe">' + e[2] + '</span></div>' +
+            '<button class="icon-btn" type="button" data-act="say" data-say="' + e[0] + '" aria-label="Play sentence">' + ICON.speaker + '</button></div>';
+        }).join('') + '</div></details>';
+    }).join('');
+    h += '<button class="btn" type="button" data-act="home">Back to lessons</button>';
+    return h;
+  }
+
+  function render(scroll) {
+    app.innerHTML = S.view === 'home' ? homeV() : S.view === 'tones' ? tonesV() : S.view === 'grammar' ? grammarV() : unitV();
+    if (scroll) window.scrollTo(0, 0);
+  }
+
+  function finishQuiz() {
+    var q = S.quiz, pct = q.score / q.qs.length;
+    q.stars = pct >= 0.9 ? 3 : pct >= 0.7 ? 2 : 1;
+    q.done = true;
+    if (S.unit !== 'mix') P.stars[S.unit] = Math.max(P.stars[S.unit] || 0, q.stars);
+    save();
+  }
+
+  function speakCurrentIfListen() {
+    var q = S.quiz;
+    if (S.tab === 'quiz' && q && !q.done && q.qs[q.i].t === 'listen') setTimeout(function () { speak(q.qs[q.i].w.zh); }, 150);
+  }
+
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('[data-act]');
+    if (!t || t.disabled) return;
+    var a = t.getAttribute('data-act'), id = t.getAttribute('data-id');
+    var c = S.cards, q = S.quiz;
+    switch (a) {
+      case 'unit': S.view = 'unit'; S.unit = id; S.tab = 'words'; S.cards = null; S.quiz = null; render(true); break;
+      case 'mix': S.view = 'unit'; S.unit = 'mix'; S.tab = 'quiz'; S.cards = null; S.quiz = null; render(true); speakCurrentIfListen(); break;
+      case 'tones': S.view = 'tones'; render(true); break;
+      case 'grammar': S.view = 'grammar'; render(true); break;
+      case 'sayex': if (BY[id] && BY[id].ex) speak(BY[id].ex.zh); break;
+      case 'home': S.view = 'home'; render(true); break;
+      case 'tab': S.tab = id; if (id === 'cards') startCards(); if (id === 'quiz') startQuiz(); render(true); speakCurrentIfListen(); break;
+      case 'say': speak(id && BY[id] ? BY[id].zh : t.getAttribute('data-say')); break;
+      case 'pinyin': P.pinyin = !P.pinyin; save(); render(false); break;
+      case 'flip': c.flipped = !c.flipped; render(false); if (c.flipped) speak(BY[c.queue[0]].zh); break;
+      case 'again': c.queue.push(c.queue.shift()); c.flipped = false; render(false); break;
+      case 'got': P.known[c.queue[0]] = true; save(); c.queue.shift(); c.done++; c.flipped = false; render(false); break;
+      case 'restartCards': startCards(); render(false); break;
+      case 'pick':
+        if (q.picked) break;
+        q.picked = id;
+        if (id === q.qs[q.i].w.id) { q.score++; P.known[id] = true; save(); }
+        render(false);
+        break;
+      case 'next':
+        q.i++; q.picked = null;
+        if (q.i >= q.qs.length) finishQuiz();
+        render(true); speakCurrentIfListen();
+        break;
+      case 'retry': startQuiz(); render(true); speakCurrentIfListen(); break;
+      case 'playq': speak(q.qs[q.i].w.zh); break;
+    }
+  });
+
+  if ('speechSynthesis' in window) {
+    try { speechSynthesis.getVoices(); } catch (e) {}
+  }
+  render(false);
+})();
+</script>
+</body>
+</html>

@@ -26,8 +26,11 @@ A phone-friendly app for learning Chinese, covering HSK 1 and HSK 2.
 pip install -r requirements.txt
 streamlit run app.py
 ```
-
-
+## Run on your computer
+```
+check it out by this link directly...
+https://gokagohsk-kshahh.streamlit.app/
+```
 ## Notes
 
 - Sound uses the voices built into the phone or computer. If a device has no Chinese voice, the app shows a message and everything else still works. On Android, install the Google text-to-speech Chinese voice. On iPhone, Chinese voices are included.

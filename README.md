@@ -27,34 +27,6 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
-## Push to GitHub from VS Code
-
-Open this folder itself in VS Code (File > Open Folder), so that `app.py` is at the top level. Then use one of these two ways.
-
-**Way 1: the VS Code buttons**
-
-1. Open the Source Control panel and click **Initialize Repository**.
-2. Type a message such as `Add Xiaobu Chinese app`, then click **Commit**.
-3. Click **Publish Branch**, sign in to GitHub if asked, and choose a public or private repository.
-
-**Way 2: the terminal** (create an empty repository on GitHub first)
-
-```bash
-git init
-git add .
-git commit -m "Add Xiaobu Chinese app"
-git branch -M main
-git remote add origin https://github.com/YOUR-USERNAME/YOUR-REPO.git
-git push -u origin main
-```
-
-## Deploy on Streamlit Community Cloud
-
-1. Make sure the repository has `app.py`, `xiaobu.html` and `requirements.txt` at its top level (not inside a folder).
-2. Go to https://share.streamlit.io and sign in with GitHub.
-3. Click **Create app** and choose your repository and the `main` branch.
-4. Set **Main file path** to `app.py`.
-5. Click **Deploy** and wait a few minutes.
 
 ## Notes
 
